@@ -1,0 +1,18 @@
+package africa.enumverse.lrs.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Score {
+    private Float scaled;
+    private Float raw;
+    private Float min;
+    private Float max;
+}
+
