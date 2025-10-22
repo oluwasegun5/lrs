@@ -1,6 +1,6 @@
 package africa.enumverse.lrs.service;
 
-import africa.enumverse.lrs.dto.StatementRequest;
+import africa.enumverse.lrs.dto.*;
 import africa.enumverse.lrs.model.*;
 import africa.enumverse.lrs.repository.StatementRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ public class StatementService {
 
     private final StatementRepository statementRepository;
 
-    public Statement createStatement(StatementRequest request) {
+    public StatementResponse createStatement(StatementRequest request) {
         log.debug("Creating statement for actor: {}", request != null && request.getActor() != null ? request.getActor().getName() : "<none>");
 
         Statement statement = Statement.builder()
@@ -33,32 +33,42 @@ public class StatementService {
                 .result(mapResult(request.getResult()))
                 .build();
 
-        return statementRepository.save(statement);
+        Statement saved = statementRepository.save(statement);
+        return mapToResponse(saved);
     }
 
-    public List<Statement> getAllStatements() {
+    public List<StatementResponse> getAllStatements() {
         log.debug("Fetching all statements");
-        return statementRepository.findAll();
+        return statementRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
-    public Optional<Statement> getStatementById(String id) {
+    public Optional<StatementResponse> getStatementById(String id) {
         log.debug("Fetching statement by id: {}", id);
-        return statementRepository.findById(id);
+        return statementRepository.findById(id)
+                .map(this::mapToResponse);
     }
 
-    public List<Statement> getStatementsByActor(String actorName) {
+    public List<StatementResponse> getStatementsByActor(String actorName) {
         log.debug("Fetching statements for actor: {}", actorName);
-        return statementRepository.findByActor_Name(actorName);
+        return statementRepository.findByActor_Name(actorName).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
-    public List<Statement> getStatementsByDateRange(LocalDateTime start, LocalDateTime end) {
+    public List<StatementResponse> getStatementsByDateRange(LocalDateTime start, LocalDateTime end) {
         log.debug("Fetching statements between {} and {}", start, end);
-        return statementRepository.findByTimestampBetween(start, end);
+        return statementRepository.findByTimestampBetween(start, end).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
-    public List<Statement> getStatementsByVerb(String verbId) {
+    public List<StatementResponse> getStatementsByVerb(String verbId) {
         log.debug("Fetching statements by verb: {}", verbId);
-        return statementRepository.findByVerb_Id(verbId);
+        return statementRepository.findByVerb_Id(verbId).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
     public void deleteStatement(String id) {
@@ -66,6 +76,7 @@ public class StatementService {
         statementRepository.deleteById(id);
     }
 
+    // Request DTO to Model mappers
     private Actor mapActor(StatementRequest.ActorDto dto) {
         if (dto == null) return null;
         Account account = null;
@@ -180,6 +191,122 @@ public class StatementService {
                 .response(dto.getResponse())
                 .duration(dto.getDuration())
                 .extensions(dto.getExtensions())
+                .build();
+    }
+
+    // Model to Response DTO mappers
+    private StatementResponse mapToResponse(Statement statement) {
+        if (statement == null) return null;
+        return StatementResponse.builder()
+                .id(statement.getId())
+                .actor(mapActorToResponse(statement.getActor()))
+                .verb(mapVerbToResponse(statement.getVerb()))
+                .object(mapStatementObjectToResponse(statement.getObject()))
+                .timestamp(statement.getTimestamp())
+                .stored(statement.getStored())
+                .authority(mapActorToResponse(statement.getAuthority()))
+                .version(statement.getVersion())
+                .attachments(statement.getAttachments())
+                .result(mapResultToResponse(statement.getResult()))
+                .context(mapContextToResponse(statement.getContext()))
+                .build();
+    }
+
+    private ActorResponse mapActorToResponse(Actor actor) {
+        if (actor == null) return null;
+        return ActorResponse.builder()
+                .id(actor.getId())
+                .name(actor.getName())
+                .mbox(actor.getMbox())
+                .mboxSha1sum(actor.getMboxSha1sum())
+                .openId(actor.getOpenId())
+                .account(mapAccountToResponse(actor.getAccount()))
+                .objectType(actor.getObjectType() != null ? actor.getObjectType().name() : null)
+                .build();
+    }
+
+    private AccountResponse mapAccountToResponse(Account account) {
+        if (account == null) return null;
+        return AccountResponse.builder()
+                .name(account.getName())
+                .homePage(account.getHomePage())
+                .build();
+    }
+
+    private VerbResponse mapVerbToResponse(Verb verb) {
+        if (verb == null) return null;
+        return VerbResponse.builder()
+                .id(verb.getId())
+                .display(verb.getDisplay())
+                .build();
+    }
+
+    private StatementObjectResponse mapStatementObjectToResponse(StatementObject object) {
+        if (object == null) return null;
+        return StatementObjectResponse.builder()
+                .id(object.getId())
+                .objectType(object.getObjectType() != null ? object.getObjectType().name() : null)
+                .definition(mapDefinitionToResponse(object.getDefinition()))
+                .build();
+    }
+
+    private DefinitionResponse mapDefinitionToResponse(Definition definition) {
+        if (definition == null) return null;
+        return DefinitionResponse.builder()
+                .name(definition.getName())
+                .description(definition.getDescription())
+                .type(definition.getType())
+                .moreInfo(definition.getMoreInfo())
+                .extensions(definition.getExtensions())
+                .build();
+    }
+
+    private ResultResponse mapResultToResponse(Result result) {
+        if (result == null) return null;
+        return ResultResponse.builder()
+                .score(mapScoreToResponse(result.getScore()))
+                .success(result.getSuccess())
+                .completion(result.getCompletion())
+                .response(result.getResponse())
+                .duration(result.getDuration())
+                .extensions(result.getExtensions())
+                .build();
+    }
+
+    private ScoreResponse mapScoreToResponse(Score score) {
+        if (score == null) return null;
+        return ScoreResponse.builder()
+                .scaled(score.getScaled())
+                .raw(score.getRaw())
+                .min(score.getMin())
+                .max(score.getMax())
+                .build();
+    }
+
+    private ContextResponse mapContextToResponse(Context context) {
+        if (context == null) return null;
+
+        Map<String, List<StatementObjectResponse>> ctxActivities = null;
+        if (context.getContextActivities() != null) {
+            ctxActivities = context.getContextActivities().entrySet().stream()
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            e -> e.getValue().stream()
+                                    .map(this::mapStatementObjectToResponse)
+                                    .collect(Collectors.toList())
+                    ));
+        }
+
+        return ContextResponse.builder()
+                .registration(context.getRegistration())
+                .instructorId(context.getInstructorId())
+                .teamId(context.getTeamId())
+                .contextActivities(ctxActivities)
+                .revision(context.getRevision())
+                .platform(context.getPlatform())
+                .language(context.getLanguage())
+                .statement(context.getStatement())
+                .extensions(context.getExtensions())
                 .build();
     }
 }
