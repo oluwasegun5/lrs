@@ -2,7 +2,7 @@ package africa.enumverse.lrs.controller;
 
 import africa.enumverse.lrs.dto.ApiResponse;
 import africa.enumverse.lrs.dto.StatementRequest;
-import africa.enumverse.lrs.model.Statement;
+import africa.enumverse.lrs.dto.StatementResponse;
 import africa.enumverse.lrs.service.StatementService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -45,7 +45,7 @@ public class StatementController {
             description = "Internal server error"
         )
     })
-    public ResponseEntity<ApiResponse<Statement>> createStatement(
+    public ResponseEntity<ApiResponse<StatementResponse>> createStatement(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                 description = "xAPI statement data",
                 required = true
@@ -53,7 +53,7 @@ public class StatementController {
             @RequestBody StatementRequest request) {
         log.info("Received request to create statement");
         try {
-            Statement statement = statementService.createStatement(request);
+            StatementResponse statement = statementService.createStatement(request);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(ApiResponse.success("Statement created successfully", statement));
         } catch (Exception e) {
@@ -68,10 +68,10 @@ public class StatementController {
         summary = "Get all statements",
         description = "Retrieves all xAPI statements from the database"
     )
-    public ResponseEntity<ApiResponse<List<Statement>>> getAllStatements() {
+    public ResponseEntity<ApiResponse<List<StatementResponse>>> getAllStatements() {
         log.info("Received request to get all statements");
         try {
-            List<Statement> statements = statementService.getAllStatements();
+            List<StatementResponse> statements = statementService.getAllStatements();
             return ResponseEntity.ok(ApiResponse.success(statements));
         } catch (Exception e) {
             log.error("Error fetching statements", e);
@@ -85,7 +85,7 @@ public class StatementController {
         summary = "Get statement by ID",
         description = "Retrieves a specific xAPI statement by its unique identifier"
     )
-    public ResponseEntity<ApiResponse<Statement>> getStatementById(
+    public ResponseEntity<ApiResponse<StatementResponse>> getStatementById(
             @Parameter(description = "Statement ID", required = true)
             @PathVariable String id) {
         log.info("Received request to get statement by id: {}", id);
@@ -100,12 +100,12 @@ public class StatementController {
         summary = "Get statements by actor name",
         description = "Retrieves all statements for a specific actor (learner)"
     )
-    public ResponseEntity<ApiResponse<List<Statement>>> getStatementsByActor(
+    public ResponseEntity<ApiResponse<List<StatementResponse>>> getStatementsByActor(
             @Parameter(description = "Actor/learner name", required = true)
             @PathVariable String actorName) {
         log.info("Received request to get statements by actor: {}", actorName);
         try {
-            List<Statement> statements = statementService.getStatementsByActor(actorName);
+            List<StatementResponse> statements = statementService.getStatementsByActor(actorName);
             return ResponseEntity.ok(ApiResponse.success(statements));
         } catch (Exception e) {
             log.error("Error fetching statements by actor", e);
@@ -119,12 +119,12 @@ public class StatementController {
         summary = "Get statements by verb",
         description = "Retrieves all statements with a specific verb (e.g., 'completed', 'passed')"
     )
-    public ResponseEntity<ApiResponse<List<Statement>>> getStatementsByVerb(
+    public ResponseEntity<ApiResponse<List<StatementResponse>>> getStatementsByVerb(
             @Parameter(description = "Verb ID (e.g., http://adlnet.gov/expapi/verbs/completed)", required = true)
             @PathVariable String verbId) {
         log.info("Received request to get statements by verb: {}", verbId);
         try {
-            List<Statement> statements = statementService.getStatementsByVerb(verbId);
+            List<StatementResponse> statements = statementService.getStatementsByVerb(verbId);
             return ResponseEntity.ok(ApiResponse.success(statements));
         } catch (Exception e) {
             log.error("Error fetching statements by verb", e);
@@ -138,14 +138,14 @@ public class StatementController {
         summary = "Get statements by date range",
         description = "Retrieves statements within a specific time period"
     )
-    public ResponseEntity<ApiResponse<List<Statement>>> getStatementsByDateRange(
+    public ResponseEntity<ApiResponse<List<StatementResponse>>> getStatementsByDateRange(
             @Parameter(description = "Start date and time (ISO format)", required = true, example = "2025-10-01T00:00:00")
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
             @Parameter(description = "End date and time (ISO format)", required = true, example = "2025-10-16T23:59:59")
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
         log.info("Received request to get statements between {} and {}", start, end);
         try {
-            List<Statement> statements = statementService.getStatementsByDateRange(start, end);
+            List<StatementResponse> statements = statementService.getStatementsByDateRange(start, end);
             return ResponseEntity.ok(ApiResponse.success(statements));
         } catch (Exception e) {
             log.error("Error fetching statements by date range", e);
