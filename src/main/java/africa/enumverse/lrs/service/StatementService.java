@@ -77,7 +77,7 @@ public class StatementService {
     }
 
     // Request DTO to Model mappers
-    private Actor mapActor(StatementRequest.ActorDto dto) {
+    private Actor mapActor(ActorDto dto) {
         if (dto == null) return null;
         Account account = null;
         if (dto.getAccount() != null) {
@@ -108,7 +108,7 @@ public class StatementService {
                 .build();
     }
 
-    private Verb mapVerb(StatementRequest.VerbDto dto) {
+    private Verb mapVerb(VerbDto dto) {
         if (dto == null) return null;
         return Verb.builder()
                 .id(dto.getId())
@@ -116,7 +116,7 @@ public class StatementService {
                 .build();
     }
 
-    private StatementObject mapActivity(StatementRequest.ActivityDto dto) {
+    private StatementObject mapActivity(ActivityDto dto) {
         if (dto == null) return null;
         ObjectType objType = null;
         if (dto.getObjectType() != null) {
@@ -146,7 +146,7 @@ public class StatementService {
                 .build();
     }
 
-    private Context mapContext(StatementRequest.ContextDto dto) {
+    private Context mapContext(ContextDto dto) {
         if (dto == null) return null;
 
         Map<String, List<StatementObject>> ctxActivities = null;
@@ -171,7 +171,7 @@ public class StatementService {
                 .build();
     }
 
-    private Result mapResult(StatementRequest.ResultDto dto) {
+    private Result mapResult(ResultDto dto) {
         if (dto == null) return null;
 
         Score score = null;
